@@ -25,14 +25,13 @@
             <p class="output">hostname</p>
             <p class="output">XDSEC</p>
         </div>
-        <chat-window-test></chat-window-test>
     </div>
 </template>
 
 <script>
-import ChatWindowTest from "../components/ChatWindowTest";
+
 export default {
-    components: {ChatWindowTest},
+    components: {},
     data() {
         return {
             countDownTime: "尚未开始",
