@@ -184,11 +184,11 @@ export default {
             this.active = id;
             // debugger;
             this.updateChallenge(id).then(chall => {
-                if (this.chatStorage[id].length === 0)
-                    this.recv(chall.description, 2);
-                if (this.chatStorage[id].length - 1 < chall.hints.length) {
-                    for (var h of chall.hints) {
-                        ajax.get("/hints/" + h.id).then(res =>
+                var current = this.chatStorage[id];
+                if (current.length === 0) this.recv(chall.description, 2);
+                if (current.length - 1 < chall.hints.length) {
+                    for (var h = current.length - 1; h < chall.hints; h++) {
+                        ajax.get("/hints/" + chall.hints[h]).then(res =>
                             this.recv(res.data.content, 2)
                         );
                     }
@@ -312,10 +312,10 @@ export default {
                 .then(res => {
                     var chall = res.data;
                     chall.done = this.challs[this.active].done;
-                    var avatar_url = chall.name.match(/\[.*\]/g)
-                    if(avatar_url !== null) {
-                        chall.name = chall.name.replace(/\[.*\]/g, '')
-                        chall.avatar = avatar_url[0].replace(/\[(.*)\]/g, "$1")
+                    var avatar_url = chall.name.match(/\[.*\]/g);
+                    if (avatar_url !== null) {
+                        chall.name = chall.name.replace(/\[.*\]/g, "");
+                        chall.avatar = avatar_url[0].replace(/\[(.*)\]/g, "$1");
                     }
                     Vue.set(this.challs, this.active, chall);
                     return chall;
