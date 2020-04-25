@@ -184,11 +184,11 @@ export default {
             this.active = id;
             // debugger;
             this.updateChallenge(id).then(chall => {
-                if (this.chatStorage[id].length === 0)
-                    this.recv(chall.description, 2);
-                if (this.chatStorage[id].length - 1 < chall.hints.length) {
-                    for (var h of chall.hints) {
-                        ajax.get("/hints/" + h.id).then(res =>
+                var current = this.chatStorage[id];
+                if (current.length === 0) this.recv(chall.description, 2);
+                if (current.length - 1 < chall.hints.length) {
+                    for (var h = current.length - 1; h < chall.hints; h++) {
+                        ajax.get("/hints/" + chall.hints[h]).then(res =>
                             this.recv(res.data.content, 2)
                         );
                     }
@@ -233,8 +233,31 @@ export default {
                         });
                     break;
                 case "延长时限":
-
+                    var url =
+                        "/container?challenge_id=" +
+                        this.challs[this.active].id;
+                    ajax.request("PATCH", url)
+                        .then(res => {
+                            if (res.success === true) {
+                                this.recv("延长时限成功");
+                                return;
+                            } else this.recv(res.msg);
+                        })
+                        .catch(err => console.log(err));
+                    break;
                 case "销毁环境":
+                    var url =
+                        "/container?challenge_id=" +
+                        this.challs[this.active].id;
+                    ajax.request("DELETE", url)
+                        .then(res => {
+                            if (res.success === true) {
+                                this.recv("销毁成功");
+                                return;
+                            } else this.recv(res.msg);
+                        })
+                        .catch(err => console.log(err));
+                    break;
                 default:
                     ajax.post("/challenges/attempt", {
                         challenge_id: this.challs[this.active].id,
@@ -289,10 +312,10 @@ export default {
                 .then(res => {
                     var chall = res.data;
                     chall.done = this.challs[this.active].done;
-                    var avatar_url = chall.name.match(/\[.*\]/g)
-                    if(avatar_url !== null) {
-                        chall.name = chall.name.replace(/\[.*\]/g, '')
-                        chall.avatar = avatar_url[0].replace(/\[(.*)\]/g, "$1")
+                    var avatar_url = chall.name.match(/\[.*\]/g);
+                    if (avatar_url !== null) {
+                        chall.name = chall.name.replace(/\[.*\]/g, "");
+                        chall.avatar = avatar_url[0].replace(/\[(.*)\]/g, "$1");
                     }
                     Vue.set(this.challs, this.active, chall);
                     return chall;
