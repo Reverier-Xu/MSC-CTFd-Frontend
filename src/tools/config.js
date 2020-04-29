@@ -1,4 +1,4 @@
-var baseURL = 'https://minil.frankli.site/api/v1';
+var baseURL = '/api/v1';
 
 var baseTime = 60000;
 

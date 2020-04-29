@@ -22,11 +22,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 
   // these devServer options should be customized in /config/index.js
   devServer: {
-    // frontend test here *REMEMBER TO DELETE*
-    headers: {
-      "Access-Control-Allow-Origin": "*"
-    },
-    // frontend test here *REMEMBER TO DELETE*
     clientLogLevel: 'warning',
     historyApiFallback: {
       rewrites: [
