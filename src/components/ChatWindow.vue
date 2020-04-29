@@ -3,7 +3,7 @@
         <!-- 顶部显示回话标题 -->
         <div class="title-container">{{title}}</div>
         <!-- 聊天信息主体 -->
-        <div class="info-container" v-if="enabled">
+        <div class="info-container">
             <a
                 ref="scr"
                 class="scroller"
@@ -16,10 +16,10 @@
                 :class="[item.admin != 0 ? '' : 'mine','info-item']"
             >
                 <div class="avatar">
-                    <img :src="item.avatar" />
+                    <img :src="item.admin != 0 ? avatar : '../../static/images/avatar.png'" />
                 </div>
                 <div class="text-container">
-                    <div class="text" v-html="item.text" v-if="item.admin != 0"></div>
+                    <vue-simple-markdown :source="item.text" v-if="item.admin != 0" class="text"></vue-simple-markdown>
                     <div class="text" v-if="item.admin === 0">{{item.text}}</div>
                 </div>
             </div>
@@ -27,7 +27,7 @@
         </div>
         <!-- 输入框主体 -->
         <div class="input-container">
-            <div class="tools-bar" v-if="enabled">
+            <div class="tools-bar">
                 <font-awesome-icon
                     :icon="['far', 'grin']"
                     width="2em"
@@ -36,50 +36,67 @@
                     :class="['tools-icon', muted ? 'disable' : '']"
                 />&nbsp;
                 <nav class="drawer">
-                    <input type="checkbox" href="#" class="menu-open" id="menu-open" />
-                    <label for="menu-open" :class="['menu-open-button', 'tools-icon', muted ? 'disable' : '']">
-                        <font-awesome-icon :icon="['fab', 'docker']" fixed-width/>
+                    <input :type="muted?'':'checkbox'" href="#" class="menu-open" id="menu-open" />
+                    <label
+                        for="menu-open"
+                        :class="['menu-open-button', 'tools-icon', muted ? 'disable' : '']"
+                    >
+                        <font-awesome-icon :icon="['fab', 'docker']" fixed-width />
                     </label>
 
-                    <font-awesome-icon class="menu-item"
+                    <font-awesome-icon
+                        class="menu-item"
                         :icon="['fas', 'play-circle']"
                         fixed-width
                         @click="send('获取环境')"
                     />
-                    <font-awesome-icon class="menu-item"
-                        :icon="['fas', 'recycle']"
+                    <font-awesome-icon
+                        class="menu-item"
+                        :icon="['fas', 'clock']"
                         fixed-width
                         @click="send('延长时限')"
                     />
-                    <font-awesome-icon class="menu-item"
+                    <font-awesome-icon
+                        class="menu-item"
                         :icon="['fas', 'stop-circle']"
                         fixed-width
                         @click="send('销毁环境')"
                     />
+                    <font-awesome-icon
+                        class="menu-item"
+                        :icon="['fas', 'redo-alt']"
+                        fixed-width
+                        @click="send('重置环境')"
+                        :transform="{ rotate: 42 }"
+                    />
                 </nav>
             </div>
-            <div v-if="!enabled"></div>
             <textarea
-                v-if="!muted && enabled"
+                v-if="!muted"
                 placeholder="flag格式: minil{xxxxx} 请提交完整字符串"
                 v-model="message"
                 @keydown.enter.prevent="send()"
                 ref="textarea"
             ></textarea>
-            <textarea v-if="muted && enabled" disabled placeholder="已经不能输入了"></textarea>
+            <textarea v-if="muted" disabled placeholder="已经不能输入了"></textarea>
         </div>
     </div>
 </template>
 
 <script>
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlayCircle, faStopCircle, faRecycle } from '@fortawesome/free-solid-svg-icons'
-import { faGrin } from '@fortawesome/free-regular-svg-icons'
-import { faDocker } from '@fortawesome/free-brands-svg-icons'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+    faPlayCircle,
+    faStopCircle,
+    faClock,
+    faRedoAlt
+} from "@fortawesome/free-solid-svg-icons";
+import { faGrin } from "@fortawesome/free-regular-svg-icons";
+import { faDocker } from "@fortawesome/free-brands-svg-icons";
 
-library.add(faPlayCircle, faStopCircle, faRecycle, faGrin, faDocker);
+library.add(faPlayCircle, faStopCircle, faClock, faGrin, faDocker, faRedoAlt);
 export default {
-    props: ["talkList", "enabled", "avatar", "title", "muted"],
+    props: ["talkList", "avatar", "title", "muted"],
     data() {
         return {
             message: "",
@@ -90,7 +107,6 @@ export default {
         send(msg = this.message) {
             if (msg === "" || this.muted) return;
             this.talkList.push({
-                avatar: "../../static/images/avatar.jpg",
                 text: msg,
                 admin: 0
             });
@@ -100,65 +116,72 @@ export default {
         },
         recv(msg, role = 1) {
             this.talkList.push({
-                avatar: this.avatar,
                 text: msg,
                 admin: role
             });
             this.$refs.scr.click();
         }
-    },
+    }
 };
 </script>
 
 <style>
-    .drawer {
-        width: 20px;
-        height: 20px;
-        align-content: center;
-    }
-    .menu-open {
-        display: none;
-    }
-    .menu-open-button {
-        z-index: 1;
-        background-color: #ffffff;
-    }
-    .menu-item {
-        -webkit-transition: -webkit-transform ease-out 200ms;
-        transition: transform ease-out 200ms, -webkit-transform ease-out 200ms;
-        color: rgb(126, 126, 126);
-    }
-    .menu-item,.menu-open-button {
-        cursor: pointer;
-        border-radius: 100%;
-        position: absolute;
-    }
+.drawer {
+    width: 20px;
+    height: 20px;
+    align-content: center;
+}
+.menu-open {
+    display: none;
+}
+.menu-open-button {
+    z-index: 1;
+    background-color: #ffffff;
+}
+.menu-item {
+    -webkit-transition: -webkit-transform ease-out 200ms;
+    transition: transform ease-out 200ms, -webkit-transform ease-out 200ms;
+    color: rgb(126, 126, 126);
+}
+.menu-item,
+.menu-open-button {
+    cursor: pointer;
+    border-radius: 100%;
+    position: absolute;
+}
 
-    .menu-open:checked ~ .menu-item {
-        -webkit-transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
-        transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
-    }
+.menu-open:checked ~ .menu-item {
+    -webkit-transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
+    transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
+}
 
-    .menu-open:checked ~ .menu-item:nth-child(3) {
-        transition-duration: 180ms;
-        -webkit-transition-duration: 180ms;
-        -webkit-transform: translate3d(0.08361px, -40.99997px, 0);
-        transform: translate3d(0.08361px, -40.99997px, 0);
-    }
+.menu-open:checked ~ .menu-item:nth-child(3) {
+    transition-duration: 160ms;
+    -webkit-transition-duration: 160ms;
+    -webkit-transform: translate3d(-33px, -27px, 0);
+    transform: translate3d(-33px, -27px, 0);
+}
 
-    .menu-open:checked ~ .menu-item:nth-child(4) {
-        transition-duration: 280ms;
-        -webkit-transition-duration: 280ms;
-        -webkit-transform: translate3d(45.9466px, -22.47586px, 0);
-        transform: translate3d(45.9466px, -22.47586px, 0);
-    }
+.menu-open:checked ~ .menu-item:nth-child(4) {
+    transition-duration: 200ms;
+    -webkit-transition-duration: 200ms;
+    -webkit-transform: translate3d(-11px, -27px, 0);
+    transform: translate3d(-11px, -27px, 0);
+}
 
-    .menu-open:checked ~ .menu-item:nth-child(5) {
-        transition-duration: 380ms;
-        -webkit-transition-duration: 380ms;
-        -webkit-transform: translate3d(45.9466px, 25.47586px, 0);
-        transform: translate3d(45.9466px, 25.47586px, 0);
-    }
+.menu-open:checked ~ .menu-item:nth-child(5) {
+    transition-duration: 240ms;
+    -webkit-transition-duration: 240ms;
+    -webkit-transform: translate3d(11px, -27px, 0);
+    transform: translate3d(11px, -27px, 0);
+}
+
+.menu-open:checked ~ .menu-item:nth-child(6) {
+    transition-duration: 280ms;
+    -webkit-transition-duration: 280ms;
+    -webkit-transform: translate3d(33px, -27px, 0);
+    transform: translate3d(33px, -27px, 0);
+}
 
 .avatar img {
     height: 100%;

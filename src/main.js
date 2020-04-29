@@ -12,8 +12,10 @@ import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText }
 
 import { Table, TableColumn } from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import { baseTime } from './tools/config.js';
 import vueSmoothScroll from 'vue2-smooth-scroll'
+import VueSimpleMarkdown from 'vue-simple-markdown'
+import 'vue-simple-markdown/dist/vue-simple-markdown.css'
+import { baseTime } from './tools/config.js';
 
 library.add(fas, far, fab);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
@@ -21,6 +23,7 @@ Vue.component('font-awesome-layers', FontAwesomeLayers);
 Vue.component('font-awesome-layers-text', FontAwesomeLayersText);
 
 Vue.use(vueSmoothScroll)
+Vue.use(VueSimpleMarkdown)
 Vue.use(Table);
 Vue.use(TableColumn);
 

@@ -15,7 +15,7 @@
                         :key="key"
                         :class="['rank-item', key === 0 ? 'one' : '', key === 1 ? 'two' : '', key === 2 ? 'three' : '']"
                     >
-                        <div class="rank-num">#{{key}}</div>
+                        <div class="rank-num">#{{key+1}}</div>
                         <router-link
                             :to="'/team/'+value.id"
                             class="link"
@@ -117,7 +117,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url("../../static/images/back.png") no-repeat;
+    background: #ededed;
     background-position: center center;
     background-size: cover;
 }

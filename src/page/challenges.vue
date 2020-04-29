@@ -6,7 +6,7 @@
                 <div class="left-container">
                     <div class="group-container">
                         <div
-                            v-if="this.notice !== ''"
+                            v-if="notice !== null"
                             :key="notice"
                             :class="['talk-item', active == notice ? 'active' : '']"
                             @click="chooseTalk(notice)"
@@ -18,8 +18,8 @@
                             <div class="text">
                                 <div class="name">{{challs[notice].name}}</div>
                                 <div
-                                    v-if="chatStorage[notice].length > 0"
-                                >{{chatStorage[notice][chatStorage[notice].length - 1].text}}</div>
+                                    v-if="chat_storage[notice].length > 0"
+                                >{{chat_storage[notice][chat_storage[notice].length - 1].text}}</div>
                             </div>
                             <div
                                 class="unread"
@@ -45,7 +45,6 @@
                             </div>
                             <div
                                 class="group-number"
-                                v-if="key !== 'notice'"
                             >{{cnt_done[key] + '/' + Object.keys(catagorized_challs[key]).length}}</div>
                         </div>
                         <!-- 生成会话头像 -->
@@ -65,8 +64,8 @@
                                 <div class="text">
                                     <div class="name">{{value2.name}}</div>
                                     <div
-                                        v-if="chatStorage[key2].length > 0"
-                                    >{{chatStorage[key2][chatStorage[key2].length - 1].text}}</div>
+                                        v-if="chat_storage[key2].length > 0"
+                                    >{{chat_storage[key2][chat_storage[key2].length - 1].text}}</div>
                                 </div>
                                 <div
                                     class="unread"
@@ -77,7 +76,7 @@
                             <div
                                 v-for="(value3, key3) in catagorized_challs[key]"
                                 :key="key3"
-                                :class="['talk-item', key3 === notice ? '' : 'disable', active == key3 ? 'active' : '']"
+                                :class="['talk-item', 'disable', active == key3 ? 'active' : '']"
                                 @click="chooseTalk(key3)"
                                 v-if="value3.done != 0"
                             >
@@ -87,8 +86,8 @@
                                 <div class="text">
                                     <div class="name">{{value3.name}}</div>
                                     <div
-                                        v-if="chatStorage[key3].length > 0"
-                                    >{{chatStorage[key3][chatStorage[key3].length - 1].text}}</div>
+                                        v-if="chat_storage[key3].length > 0"
+                                    >{{chat_storage[key3][chat_storage[key3].length - 1].text}}</div>
                                 </div>
                                 <div
                                     class="unread"
@@ -112,12 +111,12 @@
                 </div>
                 <ChatWindow
                     ref="chat"
-                    v-bind:talkList="chatStorage[active]"
-                    v-bind:enabled="active !== null"
-                    v-bind:title="active!==null?challs[active].name:''"
-                    v-bind:avatar="active!==null?challs[active].avatar:''"
-                    v-bind:muted="active!==null && challs[active].done"
-                    v-on:send_msg="send"
+                    v-if="active !== null"
+                    :talkList="chat_storage[active]"
+                    :title="challs[active].name"
+                    :avatar="challs[active].avatar"
+                    :muted="challs[active].done || active == notice"
+                    @send_msg="handle_send"
                 ></ChatWindow>
             </div>
         </div>
@@ -150,10 +149,19 @@ export default {
     },
     data() {
         return {
+            persisted: [
+                "chat_storage",
+                "challs",
+                "catagorized_challs",
+                "cnt_unread",
+                "cnt_done",
+                "has_category",
+                "notice"
+            ],
             //当前激活的会话
             active: null,
             //聊天记录
-            chatStorage: {},
+            chat_storage: {},
             //计时器id
             _time: "",
             //会话分组列表
@@ -167,8 +175,9 @@ export default {
             //未读消息数
             cnt_unread: {},
             //公告的id
-            notice: "",
-            chatprops: {}
+            notice: null,
+            //注册表
+            func_registry: {}
         };
     },
     methods: {
@@ -183,109 +192,37 @@ export default {
             this.cnt_unread[id] = 0;
             this.active = id;
             // debugger;
-            this.updateChallenge(id).then(chall => {
-                var current = this.chatStorage[id];
-                if (current.length === 0) this.recv(chall.description, 2);
-                if (current.length - 1 < chall.hints.length) {
-                    for (var h = current.length - 1; h < chall.hints; h++) {
-                        ajax.get("/hints/" + chall.hints[h]).then(res =>
-                            this.recv(res.data.content, 2)
+            this.updateHints(id);
+        },
+        handle_send(msg) {
+            if (this.func_registry[msg] !== undefined) {
+                this.func_registry[msg]();
+                return;
+            }
+            ajax.post("/challenges/attempt", {
+                challenge_id: this.challs[this.active].id,
+                submission: msg
+            })
+                .then(resp => {
+                    if (resp.success == true) return resp.data;
+                    throw resp;
+                })
+                .catch(error => console.log(error))
+                .then(resp => {
+                    this.recv(resp.message);
+                    if (resp.status == "correct") {
+                        var category = this.challs[
+                            this.active
+                        ].category.toLowerCase();
+                        this.catagorized_challs[category][this.active].done = 1;
+                        Vue.set(this.challs[this.active], "done", 1);
+                        Vue.set(
+                            this.cnt_done,
+                            category,
+                            this.cnt_done[category] + 1
                         );
                     }
-                }
-            });
-        },
-        send(msg) {
-            console.log(msg);
-            switch (msg) {
-                case "查询分值":
-                    this.updateChallenge(this.active).then(chall => {
-                        this.recv("当前题目分值" + chall.value);
-                    });
-                    break;
-                case "获取环境":
-                    var url =
-                        "/container?challenge_id=" +
-                        this.challs[this.active].id;
-                    ajax.get(url)
-                        .then(res => {
-                            if (res.remaining_time === undefined) {
-                                return ajax.post(url).then(res => {
-                                    if (res.success === true) {
-                                        this.recv("成功获取题目环境。");
-                                        this.recv(
-                                            "注意：同一账户同时只能开启同一题目，请注意合理安排做题时间"
-                                        );
-                                    } else this.recv(res.msg);
-                                    return ajax.get(url);
-                                });
-                            } else return res;
-                        })
-                        .catch(err => {
-                            if (err.status === 404)
-                                this.recv("本题🈚️题目环境");
-                        })
-                        .then(chall => {
-                            this.recv(chall.domain);
-                            this.recv(
-                                "剩余时间：" + chall.remaining_time + "秒"
-                            );
-                        });
-                    break;
-                case "延长时限":
-                    var url =
-                        "/container?challenge_id=" +
-                        this.challs[this.active].id;
-                    ajax.request("PATCH", url)
-                        .then(res => {
-                            if (res.success === true) {
-                                this.recv("延长时限成功");
-                                return;
-                            } else this.recv(res.msg);
-                        })
-                        .catch(err => console.log(err));
-                    break;
-                case "销毁环境":
-                    var url =
-                        "/container?challenge_id=" +
-                        this.challs[this.active].id;
-                    ajax.request("DELETE", url)
-                        .then(res => {
-                            if (res.success === true) {
-                                this.recv("销毁成功");
-                                return;
-                            } else this.recv(res.msg);
-                        })
-                        .catch(err => console.log(err));
-                    break;
-                default:
-                    ajax.post("/challenges/attempt", {
-                        challenge_id: this.challs[this.active].id,
-                        submission: msg
-                    })
-                        .then(resp => {
-                            if (resp.success == true) return resp.data;
-                            throw resp;
-                        })
-                        .catch(error => console.log(error))
-                        .then(resp => {
-                            this.recv(resp.message);
-                            if (resp.status == "correct") {
-                                var category = this.challs[
-                                    this.active
-                                ].category.toLowerCase();
-                                this.catagorized_challs[category][
-                                    this.active
-                                ].done = 1;
-                                Vue.set(this.challs[this.active], "done", 1);
-                                Vue.set(
-                                    this.cnt_done,
-                                    category,
-                                    this.cnt_done[category] + 1
-                                );
-                            }
-                        });
-            }
+                });
         },
         getChallenges() {
             ajax.get("/challenges")
@@ -311,32 +248,55 @@ export default {
                 .get("/challenges/" + this.challs[index].id)
                 .then(res => {
                     var chall = res.data;
-                    chall.done = this.challs[this.active].done;
+                    chall.done = this.challs[index].done;
                     var avatar_url = chall.name.match(/\[.*\]/g);
                     if (avatar_url !== null) {
                         chall.name = chall.name.replace(/\[.*\]/g, "");
                         chall.avatar = avatar_url[0].replace(/\[(.*)\]/g, "$1");
                     }
-                    Vue.set(this.challs, this.active, chall);
+                    Vue.set(this.challs, index, chall);
                     return chall;
-                }).catch(err => console.log(err));
+                })
+                .catch(err => console.log(err));
+        },
+        updateHints(index) {
+            return this.updateChallenge(index).then(chall => {
+                var current = this.chat_storage[index];
+                var cnt_hints = chall.hints.length;
+                if (current.length === 0)
+                    current.push({
+                        text: chall.description,
+                        admin: 2
+                    });
+                if (current.length - 1 < cnt_hints) {
+                    for (var h = current.length - 1; h < cnt_hints; h++) {
+                        ajax.get("/hints/" + chall.hints[h].id).then(res =>
+                            current.push({
+                                text: res.data.content,
+                                admin: 2
+                            })
+                        );
+                    }
+                }
+            });
         },
         generateList(challenges, solved) {
             for (let i in challenges) {
                 let type = challenges[i].category.toLowerCase();
-                var avatar_url = challenges[i].name.match(/\[.*\]/g)
-                if(avatar_url !== null) {
-                    challenges[i].name = challenges[i].name.replace(/\[.*\]/g, '')
-                    challenges[i].avatar = avatar_url[0].replace(/\[(.*)\]/g, "$1")
+                var avatar_url = challenges[i].name.match(/(.*)\[(.*)\]/);
+                if (avatar_url !== null) {
+                    challenges[i].name = avatar_url[1];
+                    challenges[i].avatar = avatar_url[2];
                 }
 
-                if (this.chatStorage[i] === undefined) {
-                    Vue.set(this.chatStorage, i, []);
+                if (this.chat_storage[i] === undefined) {
+                    Vue.set(this.chat_storage, i, []);
                     Vue.set(this.cnt_unread, i, 0);
                 }
-                let recvd_cnt = this.chatStorage[i].filter(o => o.admin === 2)
+                let recvd_cnt = this.chat_storage[i].filter(o => o.admin === 2)
                     .length;
-                this.cnt_unread[i] = challenges[i].hints - recvd_cnt + 1;
+                this.cnt_unread[i] =
+                    this.cnt_unread[i] + challenges[i].hints - recvd_cnt + 1;
                 if (type === "notice") {
                     this.notice = i;
                     continue;
@@ -350,6 +310,8 @@ export default {
                 Vue.set(this.catagorized_challs[type], i, challenges[i]);
             }
             this.challs = challenges;
+            for (var i in this.challs)
+                if (this.cnt_unread[i] !== 0) this.updateHints(i);
             //重新计算答题进度
             for (let i in this.catagorized_challs) {
                 let done = 0;
@@ -360,69 +322,79 @@ export default {
             }
         },
         cache() {
-            sessionStorage.setItem("challs", JSON.stringify(this.challs));
-            sessionStorage.setItem(
-                "chatStorage",
-                JSON.stringify(this.chatStorage)
-            );
-            sessionStorage.setItem(
-                "catagorized_challs",
-                JSON.stringify(this.catagorized_challs)
-            );
-            sessionStorage.setItem(
-                "cnt_unread",
-                JSON.stringify(this.cnt_unread)
-            );
-            sessionStorage.setItem("cnt_done", JSON.stringify(this.cnt_done));
-            sessionStorage.setItem("type", JSON.stringify(this.has_category));
+            for (var key of this.persisted) {
+                var val = this[key];
+                sessionStorage.setItem(key, JSON.stringify(this[key]));
+            }
         }
     },
     created() {
         //读取缓存
-        let challs =
-            sessionStorage.getItem("challs") &&
-            JSON.parse(sessionStorage.getItem("challs"));
-        let chatStorage =
-            sessionStorage.getItem("chatStorage") &&
-            JSON.parse(sessionStorage.getItem("chatStorage"));
-        let catagorized_challs =
-            sessionStorage.getItem("catagorized_challs") &&
-            JSON.parse(sessionStorage.getItem("catagorized_challs"));
-        let cnt_unread =
-            sessionStorage.getItem("cnt_unread") &&
-            JSON.parse(sessionStorage.getItem("cnt_unread"));
-        let cnt_done =
-            sessionStorage.getItem("cnt_done") &&
-            JSON.parse(sessionStorage.getItem("cnt_done"));
-        let has_category =
-            sessionStorage.getItem("type") &&
-            JSON.parse(sessionStorage.getItem("type"));
-        //若有缓存则直接使用
-        if (
-            challs != null &&
-            chatStorage != null &&
-            catagorized_challs != null &&
-            cnt_done != null &&
-            has_category != null
-        ) {
-            this.challs = challs;
-            this.chatStorage = chatStorage;
-            this.catagorized_challs = catagorized_challs;
-            this.cnt_unread = cnt_unread;
-            this.cnt_done = cnt_done;
-            this.has_category = has_category;
-            sessionStorage.clear();
-            this.getChallenges();
+        for (var key of this.persisted) {
+            var val =
+                sessionStorage.getItem(key) &&
+                JSON.parse(sessionStorage.getItem(key));
+            if (val !== null) this[key] = val;
         }
-        //若无缓存则加载
-        else {
-            this.getChallenges();
-        }
+        this.getChallenges();
+
         this._time = setInterval(() => {
             if (this.active !== null) this.updateChallenge(this.active);
             this.getChallenges();
             this.cache();
         }, this.$time);
+
+        var docker_request = method => {
+            if (this.challs[this.active].type !== "dynamic_docker")
+                return new Promise((rs, rj) => rj("本题🈚️docker环境"));
+            var url = "/container?challenge_id=" + this.challs[this.active].id;
+            return ajax.request(method, url).then(res => {
+                if (res.success === false) throw res.msg;
+                return res;
+            });
+        };
+        this.func_registry = {
+            查询分值: () =>
+                this.updateChallenge(this.active).then(chall => {
+                    this.recv("当前题目分值" + chall.value);
+                }),
+            获取环境: () => {
+                docker_request("GET")
+                    .then(res => {
+                        if (res.remaining_time !== undefined) return res;
+                        return docker_request("POST").then(res => {
+                            this.recv("成功获取题目环境。");
+                            this.recv(
+                                "注意：同一账户同时只能开启同一题目，请注意合理安排做题时间"
+                            );
+                            return docker_request("GET");
+                        });
+                    })
+                    .then(chall => {
+                        this.recv(chall.domain);
+                        this.recv("剩余时间：" + chall.remaining_time + "秒");
+                    })
+                    .catch(err => this.recv(err));
+            },
+            延长时限: () => {
+                docker_request("PATCH")
+                    .then(res => this.recv("延长时限成功"))
+                    .catch(err => this.recv(err));
+            },
+            销毁环境: () => {
+                docker_request("DELETE")
+                    .then(res => this.recv("销毁环境成功"))
+                    .catch(err => this.recv(err));
+            },
+            重置环境: () => {
+                docker_request("POST")
+                    .then(res => {
+                        this.recv("成功重置题目环境。");
+                        return this.func_registry.获取环境();
+                    })
+                    .catch(err => this.recv(err));
+            }
+        };
     },
     beforeDestroy() {
         //缓存
@@ -440,7 +412,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url("../../static/images/back.png") no-repeat;
+    background: #ededed;
     background-position: center center;
     background-size: cover;
 }
