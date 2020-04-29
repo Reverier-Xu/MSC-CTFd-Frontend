@@ -9,7 +9,7 @@
                 </div>
             </div>
             <div class="middle" v-show="showLogin">
-                <img src="../../static/images/avatar.jpg">
+                <img src="../../static/images/avatar.png">
             </div>
             <div class="bottom" v-show="showLogin">
                 <input type="text" placeholder="团队名" v-model="loginName">
@@ -18,7 +18,6 @@
             </div>
             <div class="register-container" v-show="!showLogin">
                 <input type="text" placeholder="团队名" v-model="registerName">
-                <input type="text" placeholder="学校" v-model="registerSchool">
                 <input type="text"  placeholder="登陆邮箱" v-model="registerEmail">
                 <input type="password"  placeholder="登陆密码" v-model="registerPassword">
                 <input type="password"  placeholder="重复密码" v-model="registerPasswordRepeat" @keydown.enter="register">
@@ -52,7 +51,6 @@ export default {
             loginName: '',
             loginPassword: '',
             registerName: '',
-            registerSchool: '',
             registerEmail: '',
             registerPassword: '',
             registerPasswordRepeat: '',
@@ -140,7 +138,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url('../../static/images/back.png') no-repeat;
+    background: #ededed;
     background-position: center center;
     background-size: cover;
 }
