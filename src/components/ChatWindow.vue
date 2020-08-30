@@ -16,11 +16,10 @@
                 :class="[item.admin != 0 ? '' : 'mine','info-item']"
             >
                 <div class="avatar">
-                    <img :src="item.admin != 0 ? avatar : '../../static/images/avatar.png'" />
+                    <img :src="item.admin != 0 ? 'static/images/xdmsc.png' : 'static/images/user.png'" />
                 </div>
                 <div class="text-container">
-                    <vue-simple-markdown :source="item.text" v-if="item.admin != 0" class="text"></vue-simple-markdown>
-                    <div class="text" v-if="item.admin === 0">{{item.text}}</div>
+                    <vue-simple-markdown :source="item.text" class="text"></vue-simple-markdown>
                 </div>
             </div>
             <span id="bottom"></span>
@@ -34,42 +33,7 @@
                     fixed-width
                     @click="send('查询分值')"
                     :class="['tools-icon', muted ? 'disable' : '']"
-                />&nbsp;
-                <nav class="drawer">
-                    <input :type="muted?'':'checkbox'" href="#" class="menu-open" id="menu-open" />
-                    <label
-                        for="menu-open"
-                        :class="['menu-open-button', 'tools-icon', muted ? 'disable' : '']"
-                    >
-                        <font-awesome-icon :icon="['fab', 'docker']" fixed-width />
-                    </label>
-
-                    <font-awesome-icon
-                        class="menu-item"
-                        :icon="['fas', 'play-circle']"
-                        fixed-width
-                        @click="send('获取环境')"
-                    />
-                    <font-awesome-icon
-                        class="menu-item"
-                        :icon="['fas', 'clock']"
-                        fixed-width
-                        @click="send('延长时限')"
-                    />
-                    <font-awesome-icon
-                        class="menu-item"
-                        :icon="['fas', 'stop-circle']"
-                        fixed-width
-                        @click="send('销毁环境')"
-                    />
-                    <font-awesome-icon
-                        class="menu-item"
-                        :icon="['fas', 'redo-alt']"
-                        fixed-width
-                        @click="send('重置环境')"
-                        :transform="{ rotate: 42 }"
-                    />
-                </nav>
+                />&nbsp;<div @click="send()" class="submitButton">send</div>
             </div>
             <textarea
                 v-if="!muted"
@@ -77,8 +41,7 @@
                 v-model="message"
                 ref="textarea"
             ></textarea>
-            <textarea v-if="muted" disabled placeholder="已经不能输入了"></textarea>
-            <div @click="send()"><p>send</p></div>
+            <textarea v-if="muted" disabled placeholder="你已经回答过了..."></textarea>
         </div>
     </div>
 </template>
@@ -134,54 +97,6 @@ export default {
 .menu-open {
     display: none;
 }
-.menu-open-button {
-    z-index: 1;
-    background-color: #ffffff;
-}
-.menu-item {
-    -webkit-transition: -webkit-transform ease-out 200ms;
-    transition: transform ease-out 200ms, -webkit-transform ease-out 200ms;
-    color: rgb(126, 126, 126);
-}
-.menu-item,
-.menu-open-button {
-    cursor: pointer;
-    border-radius: 100%;
-    position: absolute;
-}
-
-.menu-open:checked ~ .menu-item {
-    -webkit-transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
-    transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
-}
-
-.menu-open:checked ~ .menu-item:nth-child(3) {
-    transition-duration: 160ms;
-    -webkit-transition-duration: 160ms;
-    -webkit-transform: translate3d(-33px, -27px, 0);
-    transform: translate3d(-33px, -27px, 0);
-}
-
-.menu-open:checked ~ .menu-item:nth-child(4) {
-    transition-duration: 200ms;
-    -webkit-transition-duration: 200ms;
-    -webkit-transform: translate3d(-11px, -27px, 0);
-    transform: translate3d(-11px, -27px, 0);
-}
-
-.menu-open:checked ~ .menu-item:nth-child(5) {
-    transition-duration: 240ms;
-    -webkit-transition-duration: 240ms;
-    -webkit-transform: translate3d(11px, -27px, 0);
-    transform: translate3d(11px, -27px, 0);
-}
-
-.menu-open:checked ~ .menu-item:nth-child(6) {
-    transition-duration: 280ms;
-    -webkit-transition-duration: 280ms;
-    -webkit-transform: translate3d(33px, -27px, 0);
-    transform: translate3d(33px, -27px, 0);
-}
 
 .avatar img {
     height: 100%;
@@ -199,12 +114,12 @@ export default {
 }
 .right-container {
     height: 100%;
-    width: 600px;
+    width: 80%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    background: #ffffff;
+    background: transparent;
 }
 .title-container {
     height: 45px;
@@ -214,7 +129,7 @@ export default {
     padding: 0 20px;
     font-size: 14px;
     text-align: left;
-    background: #ffffff;
+    background: transparent;
 }
 .info-container {
     height: 480px;
@@ -262,33 +177,35 @@ export default {
     padding: 5px;
     border-radius: 5px;
     text-align: left;
-    background: rgb(240, 240, 240);
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
     word-break: break-all;
 }
 .input-container {
-    height: 170px;
+    height: 250px;
     width: 100%;
     box-sizing: border-box;
-    border-top: 1px solid rgb(245, 245, 248);
-    background: #ffffff;
+    border-top: 0px solid rgb(245, 245, 248);
+    background: rgba(40, 40, 40, 0.1);
+    color: white;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
 }
 .input-container .tools-bar {
-    height: 30px;
+    height: 36px;
     width: 100%;
     box-sizing: border-box;
-    padding: 0 20px;
+    padding:0 0px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
 }
 .tools-icon {
     height: 20px;
     width: 20px;
-    color: rgb(126, 126, 126);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     -webkit-transition-duration: 200ms;
     transition-duration: 200ms;
@@ -301,17 +218,34 @@ export default {
     cursor: not-allowed;
 }
 .input-container textarea {
-    height: 140px;
+    height: 182px;
     width: 100%;
     border: none;
     outline: none;
     box-sizing: border-box;
     padding: 10px;
     resize: none;
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
 }
 .input-container textarea:disabled {
     cursor: not-allowed;
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.submitButton {
+    color: white;
+    background: #4898ff;
+    width: 30%;
+    height: 36px;
+    line-height: 36px;
+}
+.submitButton:hover {
+    color: white;
+    background: #7098ff;
+}
+::-webkit-scrollbar {
+  width: 0;
 }
 </style>

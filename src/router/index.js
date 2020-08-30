@@ -9,6 +9,7 @@ import Login from '@/page/login'
 Vue.use(Router)
 
 var router = new Router({
+  base: process.env.ROUTER_BASE,
   mode: 'history',
   routes: [
     {
