@@ -3,8 +3,6 @@
         <!-- 关闭最大化最小化 按钮 -->
         <div class="button-container">
             <div class="red" @click="jump('index')"></div>
-            <div class="yellow"></div>
-            <div class="green"></div>
         </div>
         <!-- 中间导航按钮 -->
         <div class="nav-contaier">
@@ -12,16 +10,6 @@
                 icon="comment-dots"
                 :class="[page == 'Challenges' ? 'active' : '' ,'nav-icon']"
                 @click="jump('challenges')"
-            />
-            <font-awesome-icon
-                icon="user"
-                :class="[page == 'Team' ? 'active' : '' ,'nav-icon']"
-                @click="jump('team')"
-            />
-            <font-awesome-icon
-                icon="th-large"
-                :class="[page == 'ScoreBoard' ? 'active' : '' ,'nav-icon']"
-                @click="jump('scoreboard')"
             />
         </div>
         <!-- 右边头像 -->
@@ -32,7 +20,7 @@
                 @mouseover="logout = true"
                 @mouseout="logout = false"
             >
-                <img src="../../static/images/avatar.png" title="登出" v-show="!logout" />
+                <img src="../../static/images/xdmsc.png" title="登出" v-show="!logout" />
                 <div class="logout" v-show="logout">
                     <font-awesome-icon icon="sign-out-alt" />
                 </div>
@@ -98,7 +86,7 @@ export default {
 .top-container {
     height: 55px;
     width: 100%;
-    background: rgb(244, 244, 244);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -121,10 +109,10 @@ export default {
     background: rgb(252, 71, 72);
 }
 .button-container .yellow {
-    background: rgb(254, 181, 37);
+    background: none;
 }
 .button-container .green {
-    background: rgb(156, 209, 51);
+    background: none;
 }
 
 .avatar-container {
@@ -148,7 +136,7 @@ export default {
 .nav-icon {
     height: 28px;
     width: 24px;
-    color: rgb(117, 129, 127);
+    color: rgb(241, 241, 241);
     margin: 0 20px;
     cursor: pointer;
 }

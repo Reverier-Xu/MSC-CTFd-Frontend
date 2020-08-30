@@ -73,12 +73,12 @@
             </div>
             <textarea
                 v-if="!muted"
-                placeholder="flag格式: minil{xxxxx} 请提交完整字符串"
+                placeholder="在这里写你的答案哦~只能提交一次"
                 v-model="message"
-                @keydown.enter.prevent="send()"
                 ref="textarea"
             ></textarea>
             <textarea v-if="muted" disabled placeholder="已经不能输入了"></textarea>
+            <div @click="send()"><p>send</p></div>
         </div>
     </div>
 </template>

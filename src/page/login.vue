@@ -9,16 +9,16 @@
                 </div>
             </div>
             <div class="middle" v-show="showLogin">
-                <img src="../../static/images/avatar.png">
+                <img src="../../static/images/xdmsc.png">
             </div>
             <div class="bottom" v-show="showLogin">
-                <input type="text" placeholder="团队名" v-model="loginName">
+                <input type="text" placeholder="用户名" v-model="loginName">
                 <input type="password" placeholder="密码" v-model="loginPassword" @keydown.enter="login">
                 <font-awesome-icon :icon="['far','arrow-alt-circle-right']" class="submit" @click="login"/>
             </div>
             <div class="register-container" v-show="!showLogin">
-                <input type="text" placeholder="团队名" v-model="registerName">
-                <input type="text"  placeholder="登陆邮箱" v-model="registerEmail">
+                <input type="text" placeholder="用户名(自己取ID)" v-model="registerName">
+                <input type="text"  placeholder="邮箱(与报名保持一致)" v-model="registerEmail">
                 <input type="password"  placeholder="登陆密码" v-model="registerPassword">
                 <input type="password"  placeholder="重复密码" v-model="registerPasswordRepeat" @keydown.enter="register">
                 <font-awesome-icon :icon="['far','arrow-alt-circle-right']" class="submit" @click="register"/>
@@ -138,15 +138,16 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #ededed;
+    background: transparent;
     background-position: center center;
     background-size: cover;
 }
 .login-container {
     height: 320px;
     width: 250px;
-    border-radius: 4px;
-    background: #ffffff;
+    border-radius: 0px;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    background: rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -204,16 +205,22 @@ input {
     width: 185px;
     box-sizing: border-box;
     border: none;
-    border-bottom: 1px solid rgb(209, 212, 214);
+    border-bottom: 1px solid #c8c8c8;
     outline: none;
     font-size: 16px;
     padding-right: 10px;
+    background-color: rgba(0,0,0,0.3);
+    color: #ffffff;
+}
+input:hover{
+    background: rgba(60,60,60,0.4);
+    border-bottom: 1px solid #3498ff;
 }
 .submit {
     height: 20px;
     width: 20px;
     cursor: pointer;
-    color: black;
+    color: #ffffff;
 }
 .bottom .submit {
     position: absolute;
@@ -241,9 +248,9 @@ input {
 .message-container {
     height: 130px;
     width: 420px;
-    border-radius: 4px;
-    border: 1px solid rgb(221, 221, 221);
-    background: rgb(243, 243, 243);
+    border-radius: 0px;
+    border: 1px solid rgb(0, 102, 255);
+    background: rgba(19, 19, 19, 0.5);
     position: absolute;
     top: -40px;
     box-sizing: border-box;
@@ -251,35 +258,37 @@ input {
     text-align: left;
     font-size: 14px;
     font-weight: bold;
+    color: #ffffff;
 }
 .message-button {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    height: 20px;
-    line-height: 20px;
-    width: 75px;
-    border-radius: 5px;
-    background: #ffffff;
+    height: 32px;
+    line-height: 32px;
+    width: 100px;
+    border-radius: 0px;
+    background: #0084ff;
     font-size: 12px;
     text-align: center;
-    border: 1px solid rgb(205, 205, 205);
+    border: 1px solid rgb(0, 110, 255);
     cursor: pointer;
+    color: #ffffff;
 }
 .message-button:hover {
     color: #ffffff;
     background: rgb(38, 123, 253);
     border: 1px solid rgb(129, 169, 241);
 }
- 
+
 .tiptext {
     visibility: hidden;
     width: 60px;
-    background-color: gray;
+    background-color: rgba(22, 22, 22, 0.6);
     color: #fff;
     text-align: center;
     margin: 0 10px;
-    border-radius: 6px;
+    border-radius: 0px;
  
     position: absolute;
 }

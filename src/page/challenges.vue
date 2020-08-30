@@ -13,7 +13,7 @@
                         >
                             <div class="label">&nbsp;</div>
                             <div class="avatar">
-                                <img src="../../static/images/xdsec.png" />
+                                <img src="../../static/images/xdmsc.png" />
                             </div>
                             <div class="text">
                                 <div class="name">{{challs[notice].name}}</div>
@@ -330,12 +330,12 @@ export default {
     },
     created() {
         //读取缓存
-        for (var key of this.persisted) {
-            var val =
-                sessionStorage.getItem(key) &&
-                JSON.parse(sessionStorage.getItem(key));
-            if (val !== null) this[key] = val;
-        }
+        //for (var key of this.persisted) {
+        //    var val =
+        //        sessionStorage.getItem(key) &&
+        //        JSON.parse(sessionStorage.getItem(key));
+        //    if (val !== null) this[key] = val;
+        //}
         this.getChallenges();
 
         this._time = setInterval(() => {
@@ -412,14 +412,14 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #ededed;
+    background: transparent;
     background-position: center center;
     background-size: cover;
 }
 .container {
-    height: 750px;
-    width: 800px;
-    border-radius: 10px;
+    height: 100%;
+    width: 100%;
+    border-radius: 0px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -427,23 +427,32 @@ export default {
     align-items: center;
 }
 .main-container {
-    height: 695px;
+    height: 100%;
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
-    background: #ffffff;
+    background: rgba(0,0,0,0.2);
 }
 .left-container {
     height: 100%;
-    width: 200px;
+    width: 20%;
     box-sizing: border-box;
-    border-right: 1px solid rgb(243, 245, 248);
-    background: #ffffff;
+    border-right: 0px solid rgb(243, 245, 248);
+    background: rgba(0,0,0,0.4);
     overflow: auto;
+    color: white;
 }
 .left-container::-webkit-scrollbar {
     width: 0px;
+}
+.right-container {
+    height: 100%;
+    width: 80%;
+    box-sizing: border-box;
+    border-right: 0px solid rgb(243, 245, 248);
+    background: tran;
+    overflow: auto;
 }
 .group-container {
     min-height: 30px;
@@ -503,7 +512,7 @@ export default {
     position: relative;
 }
 .talk-item.active {
-    background: rgb(240, 240, 240);
+    background: rgba(88, 88, 88, 0.6);
 }
 .talk-item .avatar {
     height: 40px;
@@ -569,7 +578,7 @@ export default {
     font-size: 4px;
     line-height: 3em;
     width: 6em;
-    background: #8fbbe2;
+    background: #ffffff;
     position: absolute;
     left: 0;
     top: 0;
