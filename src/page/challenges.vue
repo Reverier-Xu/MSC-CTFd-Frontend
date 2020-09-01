@@ -404,28 +404,30 @@ export default {
 .container {
   height: 100%;
   width: 100%;
-  border-radius: 0px;
-  overflow: hidden;
+  border-radius: 3px;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  border: 1px solid rgb(90, 90, 90, 0.4);
 }
 .main-container {
-  height: 100%;
+  height: 95%;
   width: 100%;
   display: flex;
   justify-content: left;
   align-items: center;
   background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgb(90, 90, 90, 0.4);
 }
 .left-container {
   height: 100%;
   width: 20%;
   box-sizing: border-box;
-  border-right: 0px solid rgb(243, 245, 248);
+  border-right: 1px solid rgb(90, 90, 90, 0.4);
   background: rgba(0, 0, 0, 0.2);
-  overflow: auto;
+  overflow: scroll;
   color: white;
 }
 .left-container::-webkit-scrollbar {
